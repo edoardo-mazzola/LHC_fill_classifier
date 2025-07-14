@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python/
+env/
+venv/
+*.env
+.idea/
+.pytest_cache/
+
+# Data & Models
+data/raw/*.pkl
+data/interim/*.pkl
+models/*.joblib
+reports/*.png
+
+# Operating System
+.DS_Store
+Thumbs.db
