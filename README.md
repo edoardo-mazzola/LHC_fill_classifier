@@ -6,20 +6,22 @@ The analysis is based on luminosity time-series, extracted from the RUN 3 datase
 
 ## Structure
 
+```
 project/
 ├── data/
-│   ├── raw/           # Original raw data (ig. .pkl files of the tie series, manually generated label)
-│   └──interim/        # Intermediate data, cleaned and ready to be processed (ig. all_fills_time_series.pkl)
-│   
+│   ├── raw/         # Original raw data (e.g., .pkl files of the time series, manually generated label)
+│   └── interim/     # Intermediate data, cleaned and ready to be processed (e.g., all_fills_time_series.pkl)
+│
 ├── src/
-│   ├── utils.py       # Functions for pre-processing, feature extraction and label loading
-│   ├── train.py       # Main script for the training and initial evaluation of the model 
-│   ├── evaluate.py    # Script for in depth evaluation of the model on the test set 
-│   └── predict.py     # Script for single fill predictions (inference)
-|
-├── models/            # Machine Learning algorithms trained and saved
-├── reports/           # Evaluation reports (ig. plots, metrics)
-└── README.md          # This file
+│   ├── utils.py     # Functions for pre-processing, feature extraction and label loading
+│   ├── train.py     # Main script for the training and initial evaluation of the model
+│   ├── evaluate.py  # Script for in-depth evaluation of the model on the test set
+│   └── predict.py   # Script for single fill predictions (inference)
+│
+├── models/          # Machine Learning algorithms trained and saved (e.g., random_forest_model.joblib)
+├── reports/         # Evaluation reports (e.g., plots, metrics)
+└── README.md        # This file
+```
 
 
 ## Libraries 
