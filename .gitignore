@@ -12,9 +12,9 @@ venv/
 
 # Data & Models
 data/raw/*.pkl
-data/interim/*.pkl
+#data/interim/*.pkl
 models/*.joblib
-reports/*.png
+#reports/*.png
 
 # Operating System
 .DS_Store
