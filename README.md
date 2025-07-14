@@ -95,7 +95,7 @@ python src/predict.py
 
 ## Results and performance of the model implemented
 
-```markdown
+
 The Random Forest Model trained has shown great performances on the test set. The confusion matrix extracted turns out to be 
 [[30  0]
 [ 0 28]]
@@ -108,7 +108,7 @@ The model reached accuracy, precision and recall of **100%** on the test set, be
 
 ## Final considerations
 
-```markdown
+
 Despite the good performance of the model implemented, the project may be furtherly improved and validated.
 
 * **Generation of simulated data by MonteCarlo Method:** To increase the robustness and validity, a mechanism of synthetic data generation may be implemented. This would generate a virtually infinite test dataset, exploring also scenarios not widely represented in the real data. The workflow would include the analysis of the existing feature distribution, the statistical modelling and the extraction of new values according to the desired classes.
