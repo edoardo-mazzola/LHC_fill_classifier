@@ -80,7 +80,7 @@ def train_model():
     features_df = pd.DataFrame(features_list)
     print(f"Feature extracted for {len(features_df)} fills.")
 
-    # 4. Join feature and labels
+    # 4. Join features and labels
     
     final_df = pd.merge(features_df, labels_df, on='Fill_ID', how='inner')
     print(f"DataFrame finale con feature ed etichette creato. Dimensione: {final_df.shape}")

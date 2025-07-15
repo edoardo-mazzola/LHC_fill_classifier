@@ -19,8 +19,10 @@ RAW_DATA_PATH = 'data/raw/'
 MODELS_PATH = 'models/'
 REPORTS_PATH = 'reports/'
 
+
 # Check directories exist
 os.makedirs(REPORTS_PATH, exist_ok=True)
+
 
 # --- Configuration of the model (same used in train.py) ---
 RANDOM_STATE = 42
@@ -79,7 +81,7 @@ def evaluate_model():
             final_df[col].fillna(median_val, inplace=True)
 
     if final_df.empty:
-        print("DataFrame vuoto dopo la gestione dei NaN. Esco.")
+        print("DataFrame empty. Quitting.")
         return
 
     # 4. Data preparation 
@@ -115,6 +117,8 @@ def evaluate_model():
     print(f"F1-Score on test set: {f1:.4f}")
     print("\nClassification Report:\n", report)
     print("\nConfusion matrix:\n", conf_matrix)
+
+    
 
     # 7. Display confusion matrix
     plt.figure(figsize=(8, 6))

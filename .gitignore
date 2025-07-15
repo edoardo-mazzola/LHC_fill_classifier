@@ -12,7 +12,9 @@ venv/
 
 # Data & Models
 data/raw/*.pkl
+data/new_raw/*.pkl
 #data/interim/*.pkl
+data/processed/*.pkl
 models/*.joblib
 #reports/*.png
 

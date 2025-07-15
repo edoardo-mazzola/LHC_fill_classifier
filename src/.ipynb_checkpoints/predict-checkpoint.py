@@ -4,7 +4,7 @@ import pickle
 import joblib
 import pandas as pd
 # Import same functions from utils used to extract the features
-from utils import extract_features, load_and_extract_raw_time_series # Assicurati di includere anche questa se ti serve il pkl originale
+from utils import extract_features, load_and_extract_raw_time_series 
 
 MODELS_PATH = 'models/'
 INTERIM_DATA_PATH = 'data/interim/'

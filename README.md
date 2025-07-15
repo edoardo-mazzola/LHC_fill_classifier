@@ -1,8 +1,9 @@
-# Automatic classification of valid fills for the LHC Run 3 and HL-LHC 
+# Automatic classification of valid fills for the LHC Run 3 and analysis of the distributions of the parameters  
 
 ## Introduction
 The project implemented aims to facilitate the procedure of validation of LHC fills in presence of luminosity levelling. The Machine Learning algorithm implemented is able to recognise, after being trained on LHC RUN 3 data, whenever a fill is in compliance with the model required or not: the fill must comprehend a levelled luminosity phase (in which luminosity is kept constant) and a subsequent luminosity decay part. 
 The analysis is based on luminosity time-series, extracted from the RUN 3 dataset. The algorithm, as a matter of fact, allows to automate a process that, instead, may be carried out manually. 290 fills have been analysed and compose the dataset used for the training of the algorithm. 
+The project allows also the user to upload a new selection of fills in the directory `data\new_raw`, in order to validate the fills, extract the features and perform the analysis of the parameters' distributions of the fills' dataset.   
 
 ## Structure
 
@@ -10,13 +11,19 @@ The analysis is based on luminosity time-series, extracted from the RUN 3 datase
 project/
 ├── data/
 │   ├── raw/         # Original raw data (e.g., .pkl files of the time series, manually generated label)
-│   └── interim/     # Intermediate data, cleaned and ready to be processed (e.g., all_fills_time_series.pkl)
+|   ├── new_raw/       # New raw data for prediction (e.g., .pkl files of new time series, without labels). Not versioned.
+│   |── interim/     # Intermediate data, cleaned and ready to be processed (e.g., all_fills_time_series.pkl)
+|   └── processed/     # Processed data: extracted features and predictions (e.g., fill_features_and_predictions_for_analysis.pkl,  new_fill_predictions_for_analysis.pkl)
 │
 ├── src/
-│   ├── utils.py     # Functions for pre-processing, feature extraction and label loading
-│   ├── train.py     # Main script for the training and initial evaluation of the model
-│   ├── evaluate.py  # Script for in-depth evaluation of the model on the test set
-│   └── predict.py   # Script for single fill predictions (inference)
+│   ├── utils.py           # Functions for pre-processing, feature extraction and label loading
+│   ├── train.py           # Main script for the training and initial evaluation of the model
+│   ├── evaluate.py        # Script for in-depth evaluation of the model on the test set
+│   ├── process_new_raw_data.py      # Script for cleaning new raw data and saving it to interim
+│   ├── predict.py              # Script for single fill prediction (inference on a specified fill ID)
+│   ├── predict_new_data.py           # Script for batch prediction on new, unlabelled fills and saving results for analysis
+│   └── analyze_predictions.py        # Script for in-depth analysis and plotting of feature/prediction distributions
+│
 │
 ├── models/          # Machine Learning algorithms trained and saved (e.g., random_forest_model.joblib)
 ├── reports/         # Evaluation reports (e.g., plots, metrics)
@@ -99,14 +106,52 @@ python src/predict.py
 
 
 The Random Forest Model trained has shown great performances on the test set. The confusion matrix extracted turns out to be 
+```
 [[30  0]
 [ 0 28]]
+```
 
 showing that:
 * All the 30 fills **Not valid** have been correctly classified  as True Negative.
 * All the 28 filla **Valid** have been correctly classified as True Positive.
 
 The model reached accuracy, precision and recall of **100%** on the test set, benchmarking the efficiency of the extracted feature in the discrimination process between the two classes of fills. 
+
+
+## Processing and Batch Prediction of New, Unlabelled Fills
+
+This script is used to analyze the distributions of the extracted features and the model's predictions. It can be used for both the original test set predictions (from `evaluate.py`) and the predictions on new data (from `predict_new_data.py`).
+
+Upon execution, the script will interactively prompt the user to choose a fit type for each feature being analyzed. For each feature, you can select:
+
+0: No fit (only histogram with mean and standard deviation of data).
+
+1: Simple Gaussian Fit.
+
+2: Double Gaussian Fit.
+
+The chosen fit will be applied to the distribution of that specific feature (for both real valid and predicted valid data, across all years). The script will print the fit parameters (mean and standard deviation for simple Gaussian, or weights, means, and standard deviations for double Gaussian) directly to the console. Plots showing these distributions and fits will be saved in the `reports/` directory.
+```bash
+python src/analyze_predictions.py <input_analysis_filename.pkl>
+# To analyze the test set:
+python src/analyze_predictions.py fill_features_and_predictions_for_analysis.pkl
+# To analyze new fill predictions:
+python src/analyze_predictions.py new_fill_predictions_2025_for_analysis.pkl
+```
+
+## Analysis of Predictions and Feature Distributions
+
+This script is used to analyze the distributions of the extracted features and the model's predictions. It can be used for both the original test set predictions (from `evaluate.py`) and the predictions on new data (from `predict_new_data.py`). Plots showing distributions for relevant features will be saved in the `reports/` directory
+
+```bash
+python src/analyze_predictions.py <input_analysis_filename.pkl>
+# To analyze the test set:
+python src/analyze_predictions.py fill_features_and_predictions_for_analysis.pkl
+# To analyze new fill predictions:
+python src/analyze_predictions.py new_fill_predictions_2025_for_analysis.pkl
+```
+
+
 
 ## Final considerations
 

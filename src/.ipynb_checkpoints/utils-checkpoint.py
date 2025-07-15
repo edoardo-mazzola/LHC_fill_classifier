@@ -9,7 +9,7 @@ from scipy.signal import savgol_filter
 
 
 
-# --- Function to load, join and clean the raw time series ---
+# --- Function to load, join and clean the raw time series used in the training part ---
 def load_and_extract_raw_time_series(raw_data_path='../data/raw/', interim_data_path='../data/interim/'):
     """
     Load file .pkl raw, extract temporal series of luminosity and time and
@@ -81,6 +81,71 @@ def load_and_extract_raw_time_series(raw_data_path='../data/raw/', interim_data_
 
 
 
+# function to load and clean a single raw file
+def clean_single_raw_file(file_path):
+    """
+    It loads a single raw file .pkl, it extracts temporal series of luminosity and time and outputs a cleaned data dictionary
+    
+    Args:
+        file_path (str): path to raw file .pkl .
+
+    Returns:
+        dict: dictionary with Fill_ID as key and {'Relative_Time': array, 'Luminosity': array} as value.
+              It returns an empty dictionary if the file is not found or there are errors.
+    """
+    cleaned_fills_data = {}
+    fills_with_missing_data = []
+
+    try:
+        with open(file_path, 'rb') as f:
+            raw_data_content = pickle.load(f)
+        print(f"Loading raw data from: {file_path}")
+
+        
+        if isinstance(raw_data_content, dict) and len(raw_data_content) == 1 and isinstance(list(raw_data_content.values())[0], dict) and 'Cleaned_Stable_Beams_Data' in list(list(raw_data_content.values())[0].values())[0]:
+            # Case: {year: {fill_id: ...}}
+            all_fills_in_file = list(raw_data_content.values())[0]
+        elif isinstance(raw_data_content, dict) and all('Cleaned_Stable_Beams_Data' in v for v in raw_data_content.values()): 
+            # Case: {fill_id: ...} 
+            all_fills_in_file = raw_data_content
+        else:
+            print(f"Error: Unexpected raw data format in '{file_path}'. Expected {{year: {{fill_id: ...}}}} or {{fill_id: ...}}.")
+            return {} 
+
+
+        for fill_number, fill_content in all_fills_in_file.items():
+            try:
+                
+                luminosity_data = fill_content['Cleaned_Stable_Beams_Data']['cleaned_lumi_cut']
+                time_data = fill_content['Cleaned_Stable_Beams_Data']['cleaned_relative_time']
+
+                cleaned_fills_data[fill_number] = {
+                    'Relative_Time': np.array(time_data),
+                    'Luminosity': np.array(luminosity_data)
+                }
+            except KeyError:
+                fills_with_missing_data.append(fill_number)
+            except Exception:
+                fills_with_missing_data.append(fill_number)
+
+        if fills_with_missing_data:
+            print(f"Warning: {len(fills_with_missing_data)} fills in {os.path.basename(file_path)} had missing data or errors and were skipped.")
+        print(f"Successfully extracted {len(cleaned_fills_data)} fills from {os.path.basename(file_path)}.")
+
+    except FileNotFoundError:
+        print(f"Error: Raw file '{file_path}' not found.")
+    except Exception as e:
+        print(f"Error processing raw file '{file_path}': {e}")
+    
+    return cleaned_fills_data
+
+
+
+
+
+
+
+
 
 
 
@@ -109,7 +174,7 @@ def extract_features(luminosity_values, time_values):
     mean_dLdt_plateau = np.nan
     std_dLdt_plateau = np.nan
     mean_luminosity_plateau = np.nan
-    total_fill_duration = np.nan # Nuova feature
+    total_fill_duration = np.nan 
 
     # Data length analysis
     if len(luminosity_values) < 20 or len(time_values) < 20: 
@@ -222,15 +287,15 @@ def extract_features(luminosity_values, time_values):
                                            (decay_segment_time[-1] - decay_segment_time[0])
                     # decay length 
                     durata_decadimento = decay_segment_time[-1] - decay_segment_time[0]
-                elif len(decay_segment_time) == 1: # Decadimento di un solo punto
+                elif len(decay_segment_time) == 1: 
                     pendenza_decadimento = 0.0
                     durata_decadimento = 0.0
 
     # --- tot fill time ---
     if len(time_values) > 1:
-        total_fill_duration = time_values[-1] - time_values[0] # Differenza tra ultimo e primo tempo
+        total_fill_duration = time_values[-1] - time_values[0] 
     elif len(time_values) == 1:
-        total_fill_duration = 0.0 # Se c'è un solo punto, la durata è 0
+        total_fill_duration = 0.0 
 
     # feature dictionary
     features = {

@@ -1,25 +1,34 @@
-# Automatic classification of valid fills for the LHC Run 3 and HL-LHC 
+# Automatic classification of valid fills for the LHC Run 3 and analysis of the distributions of the parameters  
 
 ## Introduction
 The project implemented aims to facilitate the procedure of validation of LHC fills in presence of luminosity levelling. The Machine Learning algorithm implemented is able to recognise, after being trained on LHC RUN 3 data, whenever a fill is in compliance with the model required or not: the fill must comprehend a levelled luminosity phase (in which luminosity is kept constant) and a subsequent luminosity decay part. 
 The analysis is based on luminosity time-series, extracted from the RUN 3 dataset. The algorithm, as a matter of fact, allows to automate a process that, instead, may be carried out manually. 290 fills have been analysed and compose the dataset used for the training of the algorithm. 
+The project allows also the user to upload a new selection of fills in the directory `data\new_raw`, in order to validate the fills, extract the features and perform the analysis of the parameters' distributions of the fills' dataset.   
 
 ## Structure
 
+```
 project/
 ├── data/
-│   ├── raw/           # Original raw data (ig. .pkl files of the tie series, manually generated label)
-│   └──interim/        # Intermediate data, cleaned and ready to be processed (ig. all_fills_time_series.pkl)
-│   
+│   ├── raw/         # Original raw data (e.g., .pkl files of the time series, manually generated label)
+|   ├── new_raw/       # New raw data for prediction (e.g., .pkl files of new time series, without labels). Not versioned.
+│   |── interim/     # Intermediate data, cleaned and ready to be processed (e.g., all_fills_time_series.pkl)
+|   └── processed/     # Processed data: extracted features and predictions (e.g., fill_features_and_predictions_for_analysis.pkl,  new_fill_predictions_for_analysis.pkl)
+│
 ├── src/
-│   ├── utils.py       # Functions for pre-processing, feature extraction and label loading
-│   ├── train.py       # Main script for the training and initial evaluation of the model 
-│   ├── evaluate.py    # Script for in depth evaluation of the model on the test set 
-│   └── predict.py     # Script for single fill predictions (inference)
-|
-├── models/            # Machine Learning algorithms trained and saved
-├── reports/           # Evaluation reports (ig. plots, metrics)
-└── README.md          # This file
+│   ├── utils.py           # Functions for pre-processing, feature extraction and label loading
+│   ├── train.py           # Main script for the training and initial evaluation of the model
+│   ├── evaluate.py        # Script for in-depth evaluation of the model on the test set
+│   ├── process_new_raw_data.py      # Script for cleaning new raw data and saving it to interim
+│   ├── predict.py              # Script for single fill prediction (inference on a specified fill ID)
+│   ├── predict_new_data.py           # Script for batch prediction on new, unlabelled fills and saving results for analysis
+│   └── analyze_predictions.py        # Script for in-depth analysis and plotting of feature/prediction distributions
+│
+│
+├── models/          # Machine Learning algorithms trained and saved (e.g., random_forest_model.joblib)
+├── reports/         # Evaluation reports (e.g., plots, metrics)
+└── README.md        # This file
+```
 
 
 ## Libraries 
@@ -97,14 +106,53 @@ python src/predict.py
 
 
 The Random Forest Model trained has shown great performances on the test set. The confusion matrix extracted turns out to be 
+```
 [[30  0]
 [ 0 28]]
+```
 
 showing that:
 * All the 30 fills **Not valid** have been correctly classified  as True Negative.
 * All the 28 filla **Valid** have been correctly classified as True Positive.
 
 The model reached accuracy, precision and recall of **100%** on the test set, benchmarking the efficiency of the extracted feature in the discrimination process between the two classes of fills. 
+
+
+## Processing and Batch Prediction of New, Unlabelled Fills
+
+This section outlines the refined process for handling new raw data that doesn't have manual labels, applying the trained model to classify them, and preparing the results for analysis. This workflow is designed for processing new batches of data.
+
+7.1) Place New Raw Data: Place the new raw `.pkl` files (e.g., `Run3_2025_new_data.pkl`) into the `data/new_raw/` folder. These files should not contain `Is_Valid` labels.
+
+7.2) Clean New Raw Data: Run the `process_new_raw_data.py` script to clean a specific new raw file and save the cleaned time series into `data/interim/`.
+
+```bash
+python src/process_new_raw_data.py <input_raw_filename.pkl> <output_interim_filename.pkl>
+# Example:
+python src/process_new_raw_data.py Run3_2025_new_data.pkl new_fills_2025_cleaned.pkl
+```
+
+7.3) Batch Predict and Prepare for Analysis: Use the `predict_new_data.py` script to load the cleaned new data, extract features, apply the trained model for classification, and save the features along with the predictions into `data/processed/`.
+
+```bash
+python src/predict_new_data.py <input_interim_filename.pkl> <output_analysis_filename.pkl>
+# Example:
+python src/predict_new_data.py new_fills_2025_cleaned.pkl new_fill_predictions_2025_for_analysis.pkl
+```
+
+## Analysis of Predictions and Feature Distributions
+
+This script is used to analyze the distributions of the extracted features and the model's predictions. It can be used for both the original test set predictions (from `evaluate.py`) and the predictions on new data (from `predict_new_data.py`). Plots showing distributions for relevant features will be saved in the `reports/` directory
+
+```bash
+python src/analyze_predictions.py <input_analysis_filename.pkl>
+# To analyze the test set:
+python src/analyze_predictions.py fill_features_and_predictions_for_analysis.pkl
+# To analyze new fill predictions:
+python src/analyze_predictions.py new_fill_predictions_2025_for_analysis.pkl
+```
+
+
 
 ## Final considerations
 
